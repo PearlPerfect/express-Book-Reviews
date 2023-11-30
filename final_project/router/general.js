@@ -3,6 +3,7 @@ let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
+const axios = require('axios').default
 
 
 public_users.post("/register", (req,res) => {
@@ -67,5 +68,72 @@ public_users.get('/review/:isbn',function (req, res) {
       };
   //Write your code here
 });
+
+
+
+  //Get All Books 
+let getAllBooks = new Promise((resolve, reject) =>{
+  setTimeout(() => resolve(Object.values(books)), 1500);
+  });
+  public_users.get("/getbooks", function(req,res){
+    getAllBooks.then(data => {
+      return res.status(200).send(JSON.stringify(data,null,4));
+      })
+      .catch(err => {
+        console.log(err);
+        return res.status(500).send({error: err})
+        });
+})
+
+
+let searchWithIsbn= new Promise((resolve, reject) =>{
+
+  setTimeout(() => resolve(books[3]), 15);
+});
+
+public_users.get("/:isbn", function(req,res){
+  let isbn = req.params.isbn
+  searchWithIsbn.then(data => {
+    return res.status(200).send(JSON.stringify(data,null,4));
+    }).catch(err => {
+      console.log(err);
+      return res.status(500).send({error: err})
+      });
+      })
+      
+
+
+      let searchBooksByAuthor = new Promise((resolve, reject) =>{
+        setTimeout(()=> resolve( Object.values(books).filter(item=>item.author), 15));
+      });
+      public_users.get("/authors/:name", function(req,res){
+        let name = req.params.name
+        searchBooksByAuthor.then(data => {
+          return res.status(200).send(JSON.stringify(data,null,4));
+          }).catch(err => {
+            console.log(err);
+            return res.status(500).send({error: err})
+            });
+            })
+
+            //
+
+let searchWithTitle = new Promise((resolve,reject) => {
+  setTimeout(()=> resolve(Object.values(books).filter(item=> item.title === "The Book Of Job")),15)
+
+});
+  public_users.get("/title/:title",function (req,res){
+    let title = req.params.title;
+    searchWithTitle.then(data => {
+      return res.status(200).send(JSON.stringify(data,null,4))
+      }).catch(err => {
+        console.log(err);
+        return res.status(500).send({error: err})
+        });
+
+})
+  
+
+
 
 module.exports.general = public_users;
